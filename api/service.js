@@ -1,15 +1,28 @@
 const axios = require('axios');
 require("dotenv").config();
 
+const YAML = require('yaml')
+
 authorization_token=process.env.ACCESS_TOKEN;
 api_url = 'https://api.github.com/repos/isa-group/datasets/contents/plans/';
 
 
-
+/*
 module.exports.getAll = (req, res) => {
     axios.get(api_url, {headers: {Authorization: authorization_token}})
     .then(response => {
-        console.log(response.data);
+        response.data = response.data.map(async function (x) {
+            axios.get(x.url, {headers: {Authorization: authorization_token}})
+            .then(response2 => {
+                let buff = Buffer(response2.data.content, response2.data.encoding);
+                let text = buff.toString('ascii');
+                response2.data.content = YAML.parse(text);
+                return response2.data;
+            })
+            .catch(error => {
+                console.log(error);
+            });
+        })
         res.send({message: "All Ok", data: response.data});
     })
     .catch(error => {
@@ -17,11 +30,14 @@ module.exports.getAll = (req, res) => {
         res.send({message: "Error", data: error});
     });
 }
+*/
 
 module.exports.get = (req, res) => {
     axios.get(api_url+req.params.service+"-sla4oai.yaml", {headers: {Authorization: authorization_token}})
     .then(response => {
-        console.log(response.data);
+        let buff = Buffer(response.data.content, response.data.encoding);
+        let text = buff.toString('ascii');
+        response.data.content = YAML.parse(text);
         res.send({message: "1 Ok", data: response.data});
     })
     .catch(error => {
