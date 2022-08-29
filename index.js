@@ -11,7 +11,8 @@ app.use(cors());
 
 app.use('/api/v1', router);
 
-app.listen(process.env.EXPRESS_PORT || 3000, function() {
-    console.log("App running at http://localhost:" + process.env.EXPRESS_PORT);
+const port = process.env.PORT || 8080;
+app.listen(port, function() {
+    console.log("App running at http://localhost:" + port);
     console.log("________________________________________________________________");
 });
