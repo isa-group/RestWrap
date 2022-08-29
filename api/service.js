@@ -6,6 +6,9 @@ const YAML = require('yaml')
 authorization_token=process.env.ACCESS_TOKEN;
 api_url = 'https://api.github.com/repos/isa-group/datasets/contents/plans/';
 
+module.exports.getHW = (req, res) => {
+    res.send({message: "This is my Restwrap API!", data: null});
+}
 
 /*
 module.exports.getAll = (req, res) => {
