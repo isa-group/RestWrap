@@ -13,7 +13,7 @@ router.get('/service/all', (req, res) => {
 });
 */
 
-router.get('/service/:service', (req, res) => {
+router.get('/service/*', (req, res) => {
     service.get(req, res);
 });
 
