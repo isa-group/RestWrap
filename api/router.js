@@ -7,14 +7,16 @@ router.get('/', (req, res) => {
     service.getHW(req, res);
 });
 
-/*
-router.get('/service/all', (req, res) => {
-    service.getAll(req, res);
-});
-*/
-
 router.get('/service/*', (req, res) => {
     service.get(req, res);
+});
+
+router.get('/repositories/:user', (req, res) => {
+    service.getRepositories(req, res);
+});
+
+router.get('/data/:username/:repository', (req, res) => {
+    service.getRepoContent(req, res);
 });
 
 module.exports = router;
