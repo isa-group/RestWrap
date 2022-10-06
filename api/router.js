@@ -19,7 +19,7 @@ router.get('/data/:username/:repository', (req, res) => {
     service.getRepoContent(req, res);
 });
 
-router.get('/content', (req, res) => {
+router.post('/content', (req, res) => {
     service.getAnyContent(req, res);
 });
 
