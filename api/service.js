@@ -35,7 +35,6 @@ module.exports.getRepositories = (req, res) => {
     }
     )
     .catch(error => {
-        console.log(api_url_user.replace("username", username));
         axios.get(api_url_user.replace("username", username), {headers: {Authorization: authorization_token}})
         .then(response => {
             res.send({message: "200 Ok", data: response.data});
@@ -52,6 +51,18 @@ module.exports.getRepoContent = (req, res) => {
     let username = req.params.username;
     let repository = req.params.repository;
     axios.get(`${api_url_data}${username}/${repository}/contents/`, {headers: {Authorization: authorization_token}})
+    .then(response => {
+        res.send({message: "200 Ok", data: response.data});
+    })
+    .catch(error => {
+        console.log(error);
+        res.send({message: "Error", data: error});
+    });
+}
+
+module.exports.getAnyContent = (req, res) => {
+    let url = req.body.url;
+    axios.get(url, {headers: {Authorization: authorization_token}})
     .then(response => {
         res.send({message: "200 Ok", data: response.data});
     })
