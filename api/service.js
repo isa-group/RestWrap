@@ -75,3 +75,54 @@ module.exports.getAnyContent = (req, res) => {
         res.send({message: "Error", data: error});
     });
 }
+
+module.exports.apiStats = (req, res) => {
+    let destPath = req.originalUrl.split("/stats/")[1];
+    axios.get(api_url_data+destPath, {"headers": {"Authorization": authorization_token}})
+    .then(response => {
+        let buff = Buffer(response.data.content, response.data.encoding);
+        let text = buff.toString('ascii');
+        try {
+            response.data.content = YAML.parse(text);
+        } catch (error) {
+            response.data.content = text;
+        }
+        var json_file = response.data.content;
+
+        try {
+            var cheapestPlan = `${Object.keys(json_file.plans)[0]}(0)`;
+            let price = Number.MAX_SAFE_INTEGER;
+            Object.keys(json_file.plans).forEach(plan => {
+                if (json_file.plans[plan].pricing.cost < price) {
+                    price = json_file.plans[plan].pricing.cost;
+                    cheapestPlan = `${plan}(${price})`;
+                }
+            });
+    
+            var mostExpensivePlan = `${Object.keys(json_file.plans)[0]}(0)`;
+            price = 0;
+            Object.keys(json_file.plans).forEach(plan => {
+                if (json_file.plans[plan].pricing.cost > price) {
+                    price = json_file.plans[plan].pricing.cost;
+                    mostExpensivePlan = `${plan}(${price})`;
+                }
+            });
+    
+            var stats = {
+                "numberOfMetrics": Object.keys(json_file.metrics).length,
+                "metricsNames": Object.keys(json_file.metrics),
+                "numberOfPlans": Object.keys(json_file.plans).length,
+                "cheapestPlan": cheapestPlan,
+                "mostExpensivePlan": mostExpensivePlan,
+                "plans": json_file.plans,
+            }
+            res.send({message: "200 Ok", data: stats});
+        } catch (error) {
+            res.send({message: "This file is not a SLA4OAI file or It is not well created", data: null});
+        }
+       
+    })
+    .catch(error => {
+        console.log(error);
+    });
+}

@@ -23,4 +23,9 @@ router.post('/content', (req, res) => {
     service.getAnyContent(req, res);
 });
 
+router.get('/stats/*', (req, res) => {
+    service.apiStats(req, res);
+});
+
+
 module.exports = router;
