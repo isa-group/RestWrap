@@ -14,7 +14,7 @@ module.exports.getHW = (req, res) => {
 
 module.exports.get = (req, res) => {
     let destPath = req.originalUrl.split("/service/")[1];
-    axios.get(api_url_data+destPath, {"headers": {"Authorization": authorization_token}})
+    axios.get(api_url_data+destPath, {"headers": {"Authorization": `token ${authorization_token}`}})
     .then(response => {
         let buff = Buffer(response.data.content, response.data.encoding);
         let text = buff.toString('ascii');
@@ -33,13 +33,13 @@ module.exports.get = (req, res) => {
 
 module.exports.getRepositories = (req, res) => {
     let username = req.params.user;
-    axios.get(api_url_org.replace("username", username), {"headers": {"Authorization": authorization_token}})
+    axios.get(api_url_org.replace("username", username), {"headers": {"Authorization": `token ${authorization_token}`}})
     .then(response => {
         res.send({message: "200 Ok", data: response.data});
     }
     )
     .catch(error => {
-        axios.get(api_url_user.replace("username", username), {"headers": {"Authorization": authorization_token}})
+        axios.get(api_url_user.replace("username", username), {"headers": {"Authorization": `token ${authorization_token}`}})
         .then(response => {
             res.send({message: "200 Ok", data: response.data});
         }
@@ -54,7 +54,7 @@ module.exports.getRepositories = (req, res) => {
 module.exports.getRepoContent = (req, res) => {
     let username = req.params.username;
     let repository = req.params.repository;
-    axios.get(`${api_url_data}${username}/${repository}/contents/`, {"headers": {"Authorization": authorization_token}})
+    axios.get(`${api_url_data}${username}/${repository}/contents/`, {"headers": {"Authorization": `token ${authorization_token}`}})
     .then(response => {
         res.send({message: "200 Ok", data: response.data});
     })
@@ -78,7 +78,7 @@ module.exports.getAnyContent = (req, res) => {
 
 module.exports.apiStats = (req, res) => {
     let destPath = req.originalUrl.split("/stats/")[1];
-    axios.get(api_url_data+destPath, {"headers": {"Authorization": authorization_token}})
+    axios.get(api_url_data+destPath, {"headers": {"Authorization": `token ${authorization_token}`}})
     .then(response => {
         let buff = Buffer(response.data.content, response.data.encoding);
         let text = buff.toString('ascii');
