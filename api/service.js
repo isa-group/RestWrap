@@ -14,7 +14,7 @@ module.exports.getHW = (req, res) => {
 
 module.exports.get = (req, res) => {
     let destPath = req.originalUrl.split("/service/")[1];
-    axios.get(api_url_data+destPath, {"headers": {"Authorization": `token ${authorization_token}`}})
+    axios.get(api_url_data+destPath, {"headers": {"Authorization": `Token ${authorization_token}`}})
     .then(response => {
         let buff = Buffer(response.data.content, response.data.encoding);
         let text = buff.toString('ascii');
@@ -33,13 +33,13 @@ module.exports.get = (req, res) => {
 
 module.exports.getRepositories = (req, res) => {
     let username = req.params.user;
-    axios.get(api_url_org.replace("username", username), {"headers": {"Authorization": `token ${authorization_token}`}})
+    axios.get(api_url_org.replace("username", username), {"headers": {"Authorization": `Token ${authorization_token}`}})
     .then(response => {
         res.send({message: "200 Ok", data: response.data});
     }
     )
     .catch(error => {
-        axios.get(api_url_user.replace("username", username), {"headers": {"Authorization": `token ${authorization_token}`}})
+        axios.get(api_url_user.replace("username", username), {"headers": {"Authorization": `Token ${authorization_token}`}})
         .then(response => {
             res.send({message: "200 Ok", data: response.data});
         }
@@ -54,7 +54,7 @@ module.exports.getRepositories = (req, res) => {
 module.exports.getRepoContent = (req, res) => {
     let username = req.params.username;
     let repository = req.params.repository;
-    axios.get(`${api_url_data}${username}/${repository}/contents/`, {"headers": {"Authorization": `token ${authorization_token}`}})
+    axios.get(`${api_url_data}${username}/${repository}/contents/`, {"headers": {"Authorization": `Token ${authorization_token}`}})
     .then(response => {
         res.send({message: "200 Ok", data: response.data});
     })
@@ -66,7 +66,7 @@ module.exports.getRepoContent = (req, res) => {
 
 module.exports.getAnyContent = (req, res) => {
     let url = req.body.url;
-    axios.get(url, {"headers": {"Authorization": authorization_token}})
+    axios.get(url, {"headers": {"Authorization": `Token ${authorization_token}`}})
     .then(response => {
         res.send({message: "200 Ok", data: response.data});
     })
@@ -78,7 +78,7 @@ module.exports.getAnyContent = (req, res) => {
 
 module.exports.apiStats = (req, res) => {
     let destPath = req.originalUrl.split("/stats/")[1];
-    axios.get(api_url_data+destPath, {"headers": {"Authorization": `token ${authorization_token}`}})
+    axios.get(api_url_data+destPath, {"headers": {"Authorization": `Token ${authorization_token}`}})
     .then(response => {
         let buff = Buffer(response.data.content, response.data.encoding);
         let text = buff.toString('ascii');
@@ -124,5 +124,62 @@ module.exports.apiStats = (req, res) => {
     })
     .catch(error => {
         console.log(error);
+    });
+}
+
+async function getDataFromFiles(element) {
+    return axios.get(element.url, {"headers": {"Authorization": `Token ${authorization_token}`}})
+    .then(response => {
+        let buff = Buffer(response.data.content, response.data.encoding);
+        let text = buff.toString('ascii');
+        try {
+            return YAML.parse(text);
+        }
+        catch (error) {
+            return "API not well created";
+        }
+    })
+    .catch(error => {
+        return "API not well created";
+    });
+}
+
+module.exports.repositoryStats = (req, res) => {
+    let user = req.body.user;
+    let repo = req.body.repo;
+    let path = req.body.path;
+    if (path.startsWith("/")) {
+        path = path.substring(1);
+    }
+    axios.get(`${api_url_data}${user}/${repo}/contents/${path}`, {"headers": {"Authorization": `Token ${authorization_token}`}})
+    .then(response => {
+        let fileList = response.data;
+        var list_jsons = [];
+        
+        fileList.forEach(element => {
+            if (element.name.endsWith(".yaml")) {
+                const json_file = getDataFromFiles(element);
+                list_jsons.push(json_file);
+            }
+        });
+
+        Promise.all(list_jsons).then(values => {
+            var dataResult = [];
+            values.forEach(element => {
+                if (element != "API not well created") {
+                    console.log(element.plans);
+                    dataResult.push(element);
+                }
+            });
+            res.send({message: "200 Ok", data: dataResult});
+        })
+        .catch(error => {
+            console.log(error);
+        });
+        
+    })
+    .catch(error => {
+        console.log(error);
+        res.send({message: "Error", data: error});
     });
 }

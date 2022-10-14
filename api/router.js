@@ -27,5 +27,9 @@ router.get('/stats/*', (req, res) => {
     service.apiStats(req, res);
 });
 
+router.post('/repositoryStats/*', (req, res) => {
+    service.repositoryStats(req, res);
+});
+
 
 module.exports = router;
