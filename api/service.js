@@ -165,13 +165,85 @@ module.exports.repositoryStats = (req, res) => {
 
         Promise.all(list_jsons).then(values => {
             var dataResult = [];
+            var plansQuantity = 0;
+            var metricsPlan = {};
+            var index = 0;
             values.forEach(element => {
                 if (element != "API not well created") {
-                    console.log(element.plans);
+                    var planNames = Object.keys(element.plans);
+                    for (let i = 0; i < planNames.length; i++) {
+                        const plan = planNames[i];
+                        if (metricsPlan[index] == undefined) {
+                            metricsPlan[index] = {hasQuotas: false, hasRates: false, hasSimpleCost: false, hasPayAsYouGo: false, hasOvegare: false};
+                        }
+                        if (Object.keys(element.plans[plan]).includes("quotas")) {
+                            metricsPlan[index].hasQuotas = true;
+                        }
+                        if (Object.keys(element.plans[plan]).includes("rates")) {
+                            metricsPlan[index].hasRates = true;
+                        }
+                        if (Object.keys(element.plans[plan]).includes("pricing")) {
+                            metricsPlan[index].hasSimpleCost = true;
+                            if (Object.keys(element.plans[plan]).includes("quotas")) {
+                                for (let j = 0; j < Object.keys(element.plans[plan].quotas).length; j++) {
+                                    var endpoint = element.plans[plan].quotas[Object.keys(element.plans[plan].quotas)[j]];
+                                    if (endpoint.get != undefined && endpoint.get.requests != undefined) {
+                                        if (endpoint.get.requests[0].cost != undefined) {
+                                            if (endpoint.get.requests[0].cost.overage != undefined) {
+                                                metricsPlan[index].hasOvegare = true;
+                                                if (endpoint.get.requests[0].cost == 0) {
+                                                    metricsPlan[index].hasPayAsYouGo = true;
+                                                }
+                                            }
+                                            if (endpoint.get.requests[0].cost.operation != undefined) {
+                                                metricsPlan[index].hasPayAsYouGo = true;
+                                            }
+                                        }
+                                    }
+                                    
+                                }
+
+                            }
+                        }
+                    }
+                    index++;
+                    plansQuantity++;
                     dataResult.push(element);
                 }
             });
-            res.send({message: "200 Ok", data: dataResult});
+            var hasQuotas = 0;
+            var hasRates = 0;
+            var hasBoth = 0;
+            var hasLimitations = plansQuantity;
+            var hasSimpleCost = 0;
+            var hasPayAsYouGo = 0;
+            var hasOvegare = 0;
+            var stats = Object.keys(metricsPlan);
+            for (let s = 0; s < stats.length; s++) {
+                const element = stats[s];
+                if (metricsPlan[element].hasQuotas && metricsPlan[element].hasRates) {
+                    hasBoth++;
+                    hasQuotas++;
+                    hasRates++;
+                } else if (metricsPlan[element].hasQuotas) {
+                    hasQuotas++;
+                } else if (metricsPlan[element].hasRates) {
+                    hasRates++;
+                } 
+                else {
+                    hasLimitations--;
+                }
+                if (metricsPlan[element].hasSimpleCost) {
+                    hasSimpleCost++;
+                }
+                if (metricsPlan[element].hasPayAsYouGo) {
+                    hasPayAsYouGo++;
+                }
+                if (metricsPlan[element].hasOvegare) {
+                    hasOvegare++;
+                }
+            }
+            res.send({message: "200 Ok", data: dataResult, plansQuantity: plansQuantity, hasLimitations: hasLimitations, hasQuotas: hasQuotas, hasRates: hasRates, hasQuotasAndRates: hasBoth, hasSimpleCost: hasSimpleCost, hasPayAsYouGo: hasPayAsYouGo, hasOvegare: hasOvegare});
         })
         .catch(error => {
             console.log(error);
