@@ -174,7 +174,7 @@ module.exports.repositoryStats = (req, res) => {
                     for (let i = 0; i < planNames.length; i++) {
                         const plan = planNames[i];
                         if (metricsPlan[index] == undefined) {
-                            metricsPlan[index] = {hasQuotas: false, hasRates: false, hasSimpleCost: false, hasPayAsYouGo: false, hasOvegare: false};
+                            metricsPlan[index] = {hasQuotas: false, hasRates: false, hasSimpleCost: false, hasPayAsYouGo: false, hasOverage: false};
                         }
                         if (Object.keys(element.plans[plan]).includes("quotas")) {
                             metricsPlan[index].hasQuotas = true;
@@ -190,7 +190,7 @@ module.exports.repositoryStats = (req, res) => {
                                     if (endpoint.get != undefined && endpoint.get.requests != undefined) {
                                         if (endpoint.get.requests[0].cost != undefined) {
                                             if (endpoint.get.requests[0].cost.overage != undefined) {
-                                                metricsPlan[index].hasOvegare = true;
+                                                metricsPlan[index].hasOverage = true;
                                                 if (endpoint.get.requests[0].cost == 0) {
                                                     metricsPlan[index].hasPayAsYouGo = true;
                                                 }
@@ -205,6 +205,7 @@ module.exports.repositoryStats = (req, res) => {
 
                             }
                         }
+                        console.log(metricsPlan[index]);
                     }
                     index++;
                     plansQuantity++;
@@ -217,7 +218,7 @@ module.exports.repositoryStats = (req, res) => {
             var hasLimitations = plansQuantity;
             var hasSimpleCost = 0;
             var hasPayAsYouGo = 0;
-            var hasOvegare = 0;
+            var hasOverage = 0;
             var stats = Object.keys(metricsPlan);
             for (let s = 0; s < stats.length; s++) {
                 const element = stats[s];
@@ -229,21 +230,21 @@ module.exports.repositoryStats = (req, res) => {
                     hasQuotas++;
                 } else if (metricsPlan[element].hasRates) {
                     hasRates++;
-                } 
-                else {
+                } else {
                     hasLimitations--;
                 }
+
                 if (metricsPlan[element].hasSimpleCost) {
                     hasSimpleCost++;
                 }
                 if (metricsPlan[element].hasPayAsYouGo) {
                     hasPayAsYouGo++;
                 }
-                if (metricsPlan[element].hasOvegare) {
-                    hasOvegare++;
+                if (metricsPlan[element].hasOverage) {
+                    hasOverage++;
                 }
             }
-            res.send({message: "200 Ok", data: dataResult, plansQuantity: plansQuantity, hasLimitations: hasLimitations, hasQuotas: hasQuotas, hasRates: hasRates, hasQuotasAndRates: hasBoth, hasSimpleCost: hasSimpleCost, hasPayAsYouGo: hasPayAsYouGo, hasOvegare: hasOvegare});
+            res.send({message: "200 Ok", data: dataResult, plansQuantity: plansQuantity, hasLimitations: hasLimitations, hasQuotas: hasQuotas, hasRates: hasRates, hasQuotasAndRates: hasBoth, hasSimpleCost: hasSimpleCost, hasPayAsYouGo: hasPayAsYouGo, hasOvegare: hasOverage});
         })
         .catch(error => {
             console.log(error);
