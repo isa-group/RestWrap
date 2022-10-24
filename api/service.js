@@ -5,7 +5,7 @@ const YAML = require('yaml')
 
 authorization_token=process.env.ACCESS_TOKEN;
 api_url_data = 'https://api.github.com/repos/';
-api_url_org = 'https://api.github.com/orgs/username/repos';
+api_url_org = 'https://api.github.com/orgs/username/repos?type=all&per_page=100';
 api_url_user = 'https://api.github.com/users/username/repos';
 
 module.exports.getHW = (req, res) => {
@@ -36,14 +36,12 @@ module.exports.getRepositories = (req, res) => {
     axios.get(api_url_org.replace("username", username), {"headers": {"Authorization": `Token ${authorization_token}`}})
     .then(response => {
         res.send({message: "200 Ok", data: response.data});
-    }
-    )
+    })
     .catch(error => {
         axios.get(api_url_user.replace("username", username), {"headers": {"Authorization": `Token ${authorization_token}`}})
         .then(response => {
             res.send({message: "200 Ok", data: response.data});
-        }
-        )
+        })
         .catch(error => {
             console.log(error);
             res.send({message: "Error", data: error});
@@ -205,7 +203,7 @@ module.exports.repositoryStats = (req, res) => {
 
                             }
                         }
-                        console.log(metricsPlan[index]);
+                        //console.log(metricsPlan[index]);
                     }
                     index++;
                     plansQuantity++;
